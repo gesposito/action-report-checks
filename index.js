@@ -18,6 +18,15 @@ async function run() {
     const head_sha =
       (pullRequest && pullRequest.head.sha) || github.context.sha;
 
+    const octokit = github.getOctokit(githubToken);
+    // Only 65535 characters are allowed in checks.output.text
+    const gist = await octokit.gists.create({
+      files: {
+        "report.html": { content: HTML },
+      },
+      public: false,
+    });
+
     // https://developer.github.com/v3/checks/runs/
     const createCheckRequest = {
       ...github.context.repo,
@@ -25,14 +34,13 @@ async function run() {
       head_sha,
       status,
       conclusion,
+      details_url: gist.data.html_url,
       output: {
         title: "Contents",
         summary: summaryOutput,
-        text: HTML,
       },
     };
 
-    const octokit = github.getOctokit(githubToken);
     await octokit.checks.create(createCheckRequest);
   } catch (error) {
     core.setFailed(error.message);
