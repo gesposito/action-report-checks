@@ -1,13 +1,18 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: "Output HTML report to GitHub Check Runs"
+description: "Output HTML report to GitHub Check Runs"
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  github_token:
+    description: "GITHUB_TOKEN"
     required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps 
-    description: 'The message to output'
+
+  report_path:
+    description: "File path of a generated HTML report"
+    required: true
+
+  summary_selector:
+    description: "CSS selector of HTML node to be shown as summary"
+    required: true
+
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"

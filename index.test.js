@@ -1,23 +1,24 @@
-const wait = require('./wait');
-const process = require('process');
-const cp = require('child_process');
-const path = require('path');
+const { read, summary } = require("./lib/report");
 
-test('throws invalid number', async() => {
-    await expect(wait('foo')).rejects.toThrow('milleseconds not a number');
+test("Reads from a HTML", async () => {
+  const HTML = await read("./fixtures/report.html");
+  expect(HTML).toBe(`<!DOCTYPE html>
+<p>Hello world</p>
+<p class="summary">Summary</p>
+<p id="summary">Summary with ID</p>
+`);
 });
 
-test('wait 500 ms', async() => {
-    const start = new Date();
-    await wait(500);
-    const end = new Date();
-    var delta = Math.abs(end - start);
-    expect(delta).toBeGreaterThan(450);
+test("Reads a summary with a class selector", async () => {
+  const HTML = await read("./fixtures/report.html");
+
+  const summaryOutput = await summary(HTML, ".summary");
+  expect(summaryOutput).toBe("Summary");
 });
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-    process.env['INPUT_MILLISECONDS'] = 500;
-    const ip = path.join(__dirname, 'index.js');
-    console.log(cp.execSync(`node ${ip}`).toString());
-})
+test("Reads a summary with a id selector", async () => {
+  const HTML = await read("./fixtures/report.html");
+
+  const summaryOutput = await summary(HTML, "#summary");
+  expect(summaryOutput).toBe("Summary with ID");
+});

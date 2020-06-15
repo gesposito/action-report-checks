@@ -1,22 +1,42 @@
-const core = require('@actions/core');
-const wait = require('./wait');
+const core = require("@actions/core");
+const github = require("@actions/github");
 
+const { read, summary } = require("./lib/report");
 
-// most @actions toolkit packages have async methods
 async function run() {
-  try { 
-    const ms = core.getInput('milliseconds');
-    console.log(`Waiting ${ms} milliseconds ...`)
+  try {
+    const githubToken = core.getInput("github_token");
+    const reportPath = core.getInput("report_path");
+    const selector = core.getInput("summary_selector");
 
-    core.debug((new Date()).toTimeString())
-    await wait(parseInt(ms));
-    core.debug((new Date()).toTimeString())
+    const HTML = await read(reportPath);
+    const summaryOutput = await summary(HTML, selector);
 
-    core.setOutput('time', new Date().toTimeString());
-  } 
-  catch (error) {
+    const pullRequest = github.context.payload.pull_request;
+    const conclusion = "success";
+    const status = "completed";
+    const head_sha =
+      (pullRequest && pullRequest.head.sha) || github.context.sha;
+
+    // https://developer.github.com/v3/checks/runs/
+    const createCheckRequest = {
+      ...github.context.repo,
+      name: "Report Output",
+      head_sha,
+      status,
+      conclusion,
+      output: {
+        title: "Contents",
+        summary: summaryOutput,
+        text: HTML,
+      },
+    };
+
+    const octokit = github.getOctokit(githubToken);
+    await octokit.checks.create(createCheckRequest);
+  } catch (error) {
     core.setFailed(error.message);
   }
 }
 
-run()
+run();
