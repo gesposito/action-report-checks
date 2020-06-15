@@ -5,8 +5,20 @@ inputs:
     description: "GITHUB_TOKEN"
     required: true
 
+  netlify_token:
+    description: "NETLIFY_AUTH_TOKEN"
+    required: true
+
+  netlify_site_id:
+    description: "Netlify site_id to deploy to"
+    required: true
+
   report_path:
-    description: "File path of a generated HTML report"
+    description: "File path of a generated HTML report, used for uploading to Netlify"
+    required: true
+
+  report_filename:
+    description: "Filename of a generated HTML report"
     required: true
 
   summary_selector:
