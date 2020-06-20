@@ -1,0 +1,46 @@
+name: Linting
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Linting Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: node_modules Cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./yarn.lock') }}
+
+      - name: Install Yarn dependencies
+        working-directory: ./
+        run: yarn install --frozen-lockfile --prefer-offline
+
+      - name: Lint with ESLint
+        working-directory: ./
+        continue-on-error: true
+        run: |
+          yarn eslint . --format html --output-file lint/eslint.html
+
+      - name: ESLint Report
+        uses: gesposito/action-report-checks@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          netlify_token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          netlify_site_id: "0cc0b84d-8d5d-4dda-98e7-85cfa11b2b45"
+          report_path: "./lint/"
+          report_filename: "eslint.html"
+          summary_selector: "#overview div span"
