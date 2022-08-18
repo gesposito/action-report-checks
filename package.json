@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/gesposito/action-report-checks#readme",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.9.1",
     "@actions/github": "^3.0.0",
     "jsdom": "^16.2.2",
     "netlify": "^4.3.1"
